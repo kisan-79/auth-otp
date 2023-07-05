@@ -1,17 +1,9 @@
 package com.authotp.valueobjects;
 
 public class AuthRequest {
-	String phoneNumber;
+	
 	String request_id;
 	String otp;
-
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
-
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
 
 	public String getRequest_id() {
 		return request_id;

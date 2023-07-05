@@ -8,6 +8,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import com.authotp.filters.JWTFilter;
 import com.authotp.valueobjects.AuthError;
+
 /*
  * below config works for spring boot version < 2.6.8 0r spring security version < 5.6.0
  * 
@@ -24,18 +25,11 @@ public class WebSecurityConfigV1 extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
-		http.cors().and().csrf().disable()
-				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-				.sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-				.and()
-				.authorizeRequests(configurer ->
-						configurer.antMatchers("/api/auth/**").permitAll()
-						.anyRequest()
-						.authenticated()
-				).exceptionHandling()
-				.authenticationEntryPoint(authErrorHandler);
-
+		http.cors().and().csrf().disable().addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+				.authorizeRequests(
+						configurer -> configurer.antMatchers("/api/auth/**").permitAll().anyRequest().authenticated())
+				.exceptionHandling().authenticationEntryPoint(authErrorHandler);
 	}
 
 }

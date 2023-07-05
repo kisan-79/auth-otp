@@ -6,8 +6,10 @@ import com.vonage.client.VonageClient;
 import com.vonage.client.verify.CheckResponse;
 import com.vonage.client.verify.VerifyResponse;
 import com.vonage.client.verify.VerifyStatus;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -24,17 +26,18 @@ public class AuthService {
 	@Value("${vonage-secret-key}")
 	String secretKey;
 
-	VonageClient client = VonageClient.builder().apiKey(apiKey).apiSecret(secretKey).build();
+	VonageClient client = VonageClient.builder().apiKey("55a7ec32").apiSecret("dDepvBrMCIl62PGg").build();
 
+	// need to- add database to check user credentials
 	public ResponseEntity<AuthResponse> init(String identifier) {
 
 		AuthResponse response = new AuthResponse();
 
-		VerifyResponse verifyResponse = client.getVerifyClient().verify("917406454790", "Vonage");
-		
-		//VerifyResponse verifyResponse = new VerifyResponse(VerifyStatus.OK);
-		if (verifyResponse.getStatus() == VerifyStatus.OK) {
-			response.setRequest_id(verifyResponse.getRequestId());
+		//VerifyResponse otpServiceResponse =client.getVerifyClient().verify("917406454790", "Vonage");
+
+		VerifyResponse otpServiceResponse = new VerifyResponse(VerifyStatus.OK);
+		if (otpServiceResponse.getStatus() == VerifyStatus.OK) {
+			response.setRequest_id(otpServiceResponse.getRequestId());
 			response.setStatus("OTP sent successfully");
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} else {
@@ -46,14 +49,17 @@ public class AuthService {
 
 	public ResponseEntity<AuthResponse> verify(String phNumber, String request_id, String otp) {
 		AuthResponse response = new AuthResponse();
-		CheckResponse checkResponse = client.getVerifyClient().check(request_id, otp);
-		//CheckResponse checkResponse = new CheckResponse(VerifyStatus.OK);
-		if (checkResponse.getStatus() == VerifyStatus.OK) {
+		//CheckResponse otpServiceResponse = client.getVerifyClient().check(request_id, otp);
+		CheckResponse otpServiceResponse = new CheckResponse(VerifyStatus.OK);
+		if (otpServiceResponse.getStatus() == VerifyStatus.OK) {
 			response.setJwt(jwtUtil.generateToken(phNumber));
-			return new ResponseEntity<AuthResponse>(response, HttpStatus.OK);
+			response.setStatus("logged in successfully");
+			HttpHeaders header = new HttpHeaders();
+			header.set("jwtToken", response.getJwt());
+			return  ResponseEntity.ok().headers(header).body(response);
 
 		} else {
-			response.setError("Verification failed: " + checkResponse.getErrorText());
+			response.setError("Verification failed: " + otpServiceResponse.getErrorText());
 			return new ResponseEntity<AuthResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
